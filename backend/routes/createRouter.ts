@@ -9,6 +9,7 @@ import getProfileInfo from '../utils/getProfileInfo';
 import JSONError from '../utils/JSONError';
 import { Dipendente } from '../classes/Profilo';
 import getPermission from '../utils/getPermission';
+import permissionCheck from '../utils/permissionMiddleware';
 
 const createRouter = express.Router();
 
@@ -35,15 +36,17 @@ const createRouter = express.Router();
 // -----------------------------------------------------------
 // responses:
 // 200 {text: "successfully created"}
+// 401 {error: "missing Token"}
+// 403 {error: "Permission denied!"}
+// 404 {error: "user not found with the given token"}
 // 400 {error: "missing fields", missingFields}
-// 400 {error: "you're not the manager"}
 // 400 {error: "invalid birth date"}
 // 400 {error: "invalid assunzione date"}
 // 400 {error: "no worktag array"}
 // 400 {error: "elements provided are not worktags"}
 // 400 {error: "user with given email already exists!"}
 
-
+createRouter.use(permissionCheck(PermissionLevel.Manager));
 
 createRouter.post("/", async (req,res)=> {
     let fields = new Map([
@@ -65,19 +68,22 @@ createRouter.post("/", async (req,res)=> {
         return;
     }
     //auth
+    /*
     let token: string | null = null;
     try {
         token =getToken(req);
         let info = await getProfileInfo(token);
         if (getPermission(info) != "Manager"){
-            throw new JSONError("you're not the manager!! get out of here!");
+            res.status(403);
+            res.json({error: "you're not the manager!! get out of here!"});
+            return;
 
         } 
     }catch(e){
-        res.status(400);
+        res.status(404);
         res.json(e.message);
         return;
-    }
+    }*/
     const nascita = new Date(fields.get("nascita"));
     const assunzione = new Date(fields.get("assunzione"));
     if(isNaN(nascita.getDate())){

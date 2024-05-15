@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import getMissingFields from './missingFields';
-import JSONError from './JSONError';
+
 
 // This function returns the token from the request
 export default function getToken(req) {
@@ -16,10 +16,10 @@ export default function getToken(req) {
   }
 
   // Check if the token is missing
-  let missingFields = getMissingFields([["token", token]]);
+  const missingFields = getMissingFields([["token", token]]);
   if (missingFields.length != 0) {
-    let e = {'value': 'Missing fields', missingfields: missingFields };
-    throw new JSONError(e);
+    const e =  {status: 401,error: { 'error': 'Missing token', missingfields: missingFields} };
+    throw e;
   }
 
   return token;

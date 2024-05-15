@@ -1,5 +1,5 @@
 import { AUTH_IP } from '../server';
-import JSONError from './JSONError';
+
 
 
 // This function returns the profile info from the authentication microservice
@@ -24,12 +24,13 @@ export default async function getProfileInfo(token) {
   }).then(response => {
 
   if(!response.ok) {
-    let e = {'value': 'User not found with the given token'};
-    throw new JSONError(e);
+    //console.log(JSON.stringify(response.body))
+    const e = {status: 404,error: {'error': 'User not found with the given token'}};
+    throw e;
   }
 
   return response.json();
   });
-  console.log(JSON.stringify(response));
+  console.log("oooooo "+JSON.stringify(response));
   return response;
 }

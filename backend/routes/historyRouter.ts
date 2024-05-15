@@ -13,6 +13,7 @@ import getProfileInfo from '../utils/getProfileInfo';
 import JSONError from '../utils/JSONError';
 import { Dipendente } from '../classes/Profilo';
 import getPermission from '../utils/getPermission';
+import permissionCheck from '../utils/permissionMiddleware';
 
 const historyRouter = express.Router();
 // Route:
@@ -32,12 +33,14 @@ const historyRouter = express.Router();
 // -----------------------------------------------------------
 // responses:
 // 200 {[task1,task2,...]}
+// 401 {error: "missing Token"}
+// 403 {error: "Permission denied!"}
+// 404 {error: "user not found with the given token"}
 // 400 {error: "missing fields", missingFields}
-// 400 {error: "you're not the manager"}
 // 404 {error: "dipendente not found"}
 
 
-
+historyRouter.use(permissionCheck(PermissionLevel.Manager));
 
 
 historyRouter.post("/", async (req,res)=> {
@@ -53,6 +56,7 @@ historyRouter.post("/", async (req,res)=> {
         return;
     }
     //auth
+    /*
     let token: string | null = null;
     try {
         token =getToken(req);
@@ -66,6 +70,7 @@ historyRouter.post("/", async (req,res)=> {
         res.json(e.message);
         return;
     }
+    */
 
     const dipendente = await db_users.collection("users").findOne({email:fields.get("email")});
     

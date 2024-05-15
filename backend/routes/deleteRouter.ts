@@ -6,6 +6,8 @@ import getProfileInfo from '../utils/getProfileInfo';
 import JSONError from '../utils/JSONError';
 
 import getPermission from '../utils/getPermission';
+import PermissionLevel, { checkPermission } from '../enums/PermissionLevel';
+import permissionCheck from '../utils/permissionMiddleware';
 
 const deleteRouter = express.Router();
 
@@ -26,10 +28,13 @@ const deleteRouter = express.Router();
 // -----------------------------------------------------------
 // responses:
 // 200 {text: "successfully deleted the profile"}
+// 401 {error: "missing Token"}
+// 403 {error: "Permission denied!"}
+// 404 {error: "user not found with the given token"}
 // 400 {error: "missing fields", missingFields}
-// 400 {error: "you're not the manager"}
 // 404 {error: "user not found"}
 
+deleteRouter.use(permissionCheck(PermissionLevel.Manager));
 
 
 deleteRouter.delete("/", async (req,res)=> {
@@ -45,6 +50,7 @@ deleteRouter.delete("/", async (req,res)=> {
         return;
     }
     //auth
+    /*
     let token: string | null = null;
     try {
         token =getToken(req);
@@ -58,7 +64,7 @@ deleteRouter.delete("/", async (req,res)=> {
         res.json(e.message);
         return;
     }
-
+    */
 
     const user = await db_users.collection("users").findOne({email:fields.get("email")});
     if(user == null){

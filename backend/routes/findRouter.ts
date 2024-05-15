@@ -9,6 +9,7 @@ import getProfileInfo from '../utils/getProfileInfo';
 import JSONError from '../utils/JSONError';
 import { Dipendente } from '../classes/Profilo';
 import getPermission from '../utils/getPermission';
+import permissionCheck from '../utils/permissionMiddleware';
 
 const findRouter = express.Router();
 
@@ -41,8 +42,10 @@ const findRouter = express.Router();
 // responses:
 // 200 {user} if mode = one
 // 200 {users: []} if mode = many
+// 401 {error: "missing Token"}
+// 403 {error: "Permission denied!"}
+// 404 {error: "user not found with the given token"}
 // 400 {error: "missing fields", missingFields}
-// 400 {error: "you're not the manager"}
 // 400 {error: "invalid birth date"}
 
 // 404{error: "user not found!"} if mode = one
@@ -50,7 +53,7 @@ const findRouter = express.Router();
 
 
 
-
+findRouter.use(permissionCheck(PermissionLevel.Manager));
 findRouter.post("/", async (req,res)=> {
     const fields = new Map([
         ["mode", req.body.mode],
@@ -64,6 +67,7 @@ findRouter.post("/", async (req,res)=> {
         return;
     }
     //auth
+    /*
     let token: string | null = null;
     try {
         token =getToken(req);
@@ -77,6 +81,7 @@ findRouter.post("/", async (req,res)=> {
         res.json(e.message);
         return;
     }
+    */
     const schema = removeBlankAttributes({
         email: req.body.email,
         nome: req.body.nome,
